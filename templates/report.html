@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>{{ member.name }} 연차사용 보고서</title>
+    <style>
+table {
+    border: 1px solid black;
+    border-collapse: collapse;
+    text-align: center;
+}
+
+th, td {
+    border: 1px solid lightgray;
+    border-collapse: collapse;
+    height: 2em;
+}
+
+.month {
+    width: 6em;
+}
+
+.day {
+    width: 3em;
+}
+
+.saturday {
+    background-color: color-mix(in srgb, skyblue 25%, transparent);
+}
+
+.sunday, .holiday {
+    background-color: color-mix(in srgb, orangered 25%, transparent);
+}
+
+.blank {
+    background-color: lightgray;
+}
+    </style>
+</head>
+<body>
+<div><h1>{{ year }}년 {{ member.name }} 연차사용 보고서</h1></div>
+<div>총 연차 일수 : {{ member.dayoff_count }} (기본 {{ member.dayoff_base_count }} / 추가 {{ member.dayoff_additional_count }})</div>
+<div>사용 연차 일수 : {{ member.dayoff_used_count }}</div>
+<div>잔여 연차 일수 : {{ member.dayoff_left_count }}</div>
+<div>
+    <h2>월별 연차사용현황</h2>
+    <table>
+        <thead>
+            <tr>
+                <th class="month">연월</th>
+                {% for day in range(1, 32) %}
+                <th class="day">{{ day }}</th>
+                {% endfor %}
+                <th class="month">합계</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for month in range(1, 13) %}
+            <tr>
+                <td class="month">{{ month }}월</td>
+                {% for day in range(1, 32) %}
+                <td class="day {{ weekends[month][day] }}">{{ symbols[month][day] }}</td>
+                {% endfor %}
+                <td class="month">{% if member.monthly_used_dayoffs(year)[month] > 0 %}{{ member.monthly_used_dayoffs(year)[month] }}{% endif %}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    <p>범례</p>
+    <ul>
+        <li>◎ - 연차</li>
+        <li>△ - 오전 반차</li>
+        <li>▽ - 오후 반차</li>
+        <li>↑↑ - 반반차(09-11)</li>
+        <li>↑↓ - 반반차(11-13)</li>
+        <li>↓↑ - 반반차(14-16)</li>
+        <li>↓↓ - 반반차(16-18)</li>
+        <li>● - 공가, 병가 등 연차 외 휴가</li>
+        <li>※ - 기타</li>
+        <li>? - 기재 이상</li>
+    </ul>
+</div>
+<div>
+    <h2>상세 연차 사용 내역</h2>
+    <ul>
+        {% for leave in member.leaves %}
+        <li>{{ leave }}</li>
+        {% endfor %}
+    </ul>
+</div>
+</body>
+</html>
