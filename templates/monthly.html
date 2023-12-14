@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>{{ month }}월 연차사용 보고서</title>
+    <style>
+table {
+    border: 1px solid black;
+    border-collapse: collapse;
+    text-align: center;
+}
+
+th, td {
+    border: 1px solid lightgray;
+    border-collapse: collapse;
+    height: 2em;
+}
+
+.month {
+    width: 6em;
+}
+
+.day {
+    width: 12em;
+}
+
+.saturday {
+    background-color: color-mix(in srgb, skyblue 25%, transparent);
+}
+
+.sunday, .holiday {
+    background-color: color-mix(in srgb, orangered 25%, transparent);
+}
+
+.blank {
+    background-color: lightgray;
+}
+    </style>
+</head>
+<body>
+<div><h1>{{ year }}년 {{ month }}월 연차사용 보고서</h1></div>
+<div>
+    <table>
+        <thead>
+            <tr>
+                <th class="day">월</th>
+                <th class="day">화</th>
+                <th class="day">수</th>
+                <th class="day">목</th>
+                <th class="day">금</th>
+                <th class="day saturday">토</th>
+                <th class="day sunday">일</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for weeknum in range(weeks) %}
+            <tr>
+                {% for daynum in range(0, 7) %}
+                <td class="day {{ report.weekdays[weeknum][daynum] }}">{{ report.days[weeknum][daynum] }}</td>
+                {% endfor %}
+            </tr>
+            <tr>
+                {% for daynum in range(0, 7) %}
+                <td class="day {{ report.weekdays[weeknum][daynum] }}">{{ report.leave_members[weeknum][daynum]|safe }}</td>
+                {% endfor %}
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+<div>
+    <p>범례</p>
+    <ul>
+        <li>◎ - 연차</li>
+        <li>△ - 오전 반차</li>
+        <li>▽ - 오후 반차</li>
+        <li>↑↑ - 반반차(09-11)</li>
+        <li>↑↓ - 반반차(11-13)</li>
+        <li>↓↑ - 반반차(14-16)</li>
+        <li>↓↓ - 반반차(16-18)</li>
+        <li>● - 공가, 병가 등 연차 외 휴가</li>
+        <li>※ - 기타</li>
+        <li>? - 기재 이상</li>
+    </ul>
+</div>
+</body>
+</html>

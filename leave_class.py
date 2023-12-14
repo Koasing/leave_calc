@@ -1,5 +1,6 @@
 from dataclasses import dataclass
 
+import calendar
 from datetime import date, timedelta
 import re
 
@@ -181,6 +182,82 @@ class Member:
 
         c = Compensation(reason, count)
         self.compensations.append(c)
+
+
+class MonthlyReport:
+    year: int
+    month: int
+
+    _days_count: int
+    _lead_padding_count: int
+    _trail_padding_count: int
+
+    _lead_padding: list[str]
+    _trail_padding: list[str]
+
+    _days: list[str]
+    _weekdays: list[str]
+    _leave_members: list[str]
+
+    def __init__(self, year, month):
+        self.year = year
+        self.month = month
+
+        self._lead_padding_count, self._days_count = calendar.monthrange(self.year, self.month)
+        self._trail_padding_count = (7 - ((self._lead_padding_count + self._days_count) % 7)) % 7
+
+        self._lead_padding = [''] * self._lead_padding_count
+        self._trail_padding = [''] * self._trail_padding_count
+
+        self._days = self._lead_padding + [str(d) for d in range(1, self._days_count + 1)] + self._trail_padding
+        self._weekdays = ["", "", "", "", "", "saturday", "sunday"] * (len(self._days) // 7)
+        self._leave_members = [''] * len(self._days)
+
+    @property
+    def days(self):
+        arr = self._days
+        assert len(arr) % 7 == 0
+        # 1x7k to 7xk
+        return [arr[i:i + 7] for i in range(0, len(arr), 7)]
+
+    @property
+    def weekdays(self):
+        arr = self._weekdays
+        assert len(arr) % 7 == 0
+        # 1x7k to 7xk
+        return [arr[i:i + 7] for i in range(0, len(arr), 7)]
+
+    @property
+    def leave_members(self):
+        arr = self._leave_members
+        assert len(arr) % 7 == 0
+        # 1x7k to 7xk
+        return [arr[i:i + 7] for i in range(0, len(arr), 7)]
+
+    def apply_holidays(self, holidays: list[date]):
+        for h in holidays:
+            if h.year == self.year and h.month == self.month:
+                idx = h.day + self._lead_padding_count - 1
+                assert self._days[idx] == str(h.day)
+                self._weekdays[idx] = 'holiday'
+
+    def append_member(self, member: Member):
+        for leave in member.leaves:
+            if leave.date_.year == self.year and leave.date_.month == self.month:
+                idx = leave.date_.day + self._lead_padding_count - 1
+                assert self._days[idx] == str(leave.date_.day)
+
+                if leave.type_ in SYMBOL_TABLE:
+                    symbol = SYMBOL_TABLE[leave.type_]
+                elif leave.type_.endswith('취소'):
+                    continue
+                else:
+                    symbol = '?'
+
+                if len(self._leave_members[idx]) == 0:
+                    self._leave_members[idx] = f'{member.name}({symbol})'
+                else:
+                    self._leave_members[idx] += f'<br />{member.name}({symbol})'
 
 
 def update_holidays(holidays: pd.DataFrame) -> list[date]:

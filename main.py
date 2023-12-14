@@ -1,8 +1,8 @@
 import pandas as pd
 
 from leave_class import update_holidays
-from leave_class import Member, Leave
-from draw_report import build_symbols, draw_report
+from leave_class import Member
+from draw_report import draw_report, draw_monthly
 
 
 def main(fn: str, year=2023):
@@ -29,6 +29,9 @@ def main(fn: str, year=2023):
 
     for member in members.values():
         draw_report(member, h, year)
+
+    for month in range(1, 13):
+        draw_monthly(members.values(), h, year, month)
 
 
 if __name__ == "__main__":

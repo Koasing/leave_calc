@@ -1,8 +1,10 @@
+from collections.abc import Iterable
+
 from datetime import date
 
 from jinja2 import Environment, FileSystemLoader, select_autoescape
 
-from leave_class import THIS_YEAR, Member, Leave, SYMBOL_TABLE
+from leave_class import THIS_YEAR, Member, MonthlyReport, SYMBOL_TABLE
 
 
 jinja2_env = Environment(
@@ -69,3 +71,18 @@ def draw_report(member: Member, holidays: list[date], year=THIS_YEAR):
 
     with open(f'{member.name}(잔여 {member.dayoff_left_count}).html', mode='w', encoding='utf-8') as fd:
         fd.write(report)
+
+
+def draw_monthly(members: Iterable[Member], holidays: list[date], year=THIS_YEAR, month=1):
+    monthly = MonthlyReport(year, month)
+    monthly.apply_holidays(holidays)
+
+    for member in members:
+        monthly.append_member(member)
+
+    template = jinja2_env.get_template('monthly.html')
+    report = template.render(year=year, month=month, report=monthly, weeks=len(monthly.days))
+
+    with open(f'{year}년 {month}월.html', mode='w', encoding='utf-8') as fd:
+        fd.write(report)
+
