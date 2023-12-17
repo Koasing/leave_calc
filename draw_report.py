@@ -1,3 +1,4 @@
+import os, os.path
 from collections.abc import Iterable
 
 from datetime import date
@@ -62,18 +63,21 @@ def build_weekends(holidays: list[date], year=THIS_YEAR) -> list[list[str]]:
     return table
 
 
-def draw_report(member: Member, holidays: list[date], year=THIS_YEAR):
+def draw_report(member: Member, holidays: list[date], year=THIS_YEAR, output_dir="."):
     symbols = build_symbols(member, year)
     weekends = build_weekends(holidays, year)
 
     template = jinja2_env.get_template('report.html')
     report = template.render(year=year, member=member, symbols=symbols, weekends=weekends)
 
-    with open(f'{member.name}(잔여 {member.dayoff_left_count}).html', mode='w', encoding='utf-8') as fd:
+    os.makedirs(output_dir, exist_ok=True)
+    output_file = os.path.join(output_dir, f'{member.name}(잔여 {member.dayoff_left_count}).html')
+
+    with open(output_file, mode='w', encoding='utf-8') as fd:
         fd.write(report)
 
 
-def draw_monthly(members: Iterable[Member], holidays: list[date], year=THIS_YEAR, month=1):
+def draw_monthly(members: Iterable[Member], holidays: list[date], year=THIS_YEAR, month=1, output_dir="."):
     monthly = MonthlyReport(year, month)
     monthly.apply_holidays(holidays)
 
@@ -83,6 +87,9 @@ def draw_monthly(members: Iterable[Member], holidays: list[date], year=THIS_YEAR
     template = jinja2_env.get_template('monthly.html')
     report = template.render(year=year, month=month, report=monthly, weeks=len(monthly.days))
 
-    with open(f'{year}년 {month}월.html', mode='w', encoding='utf-8') as fd:
+    os.makedirs(output_dir, exist_ok=True)
+    output_file = os.path.join(output_dir, f'{year}년 {month}월.html')
+
+    with open(output_file, mode='w', encoding='utf-8') as fd:
         fd.write(report)
 

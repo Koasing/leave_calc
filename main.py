@@ -28,10 +28,10 @@ def main(fn: str, year=2023):
         member.add_leaves(row, h)
 
     for member in members.values():
-        draw_report(member, h, year)
+        draw_report(member, h, year, './output')
 
     for month in range(1, 13):
-        draw_monthly(members.values(), h, year, month)
+        draw_monthly(members.values(), h, year, month, './output')
 
 
 if __name__ == "__main__":
