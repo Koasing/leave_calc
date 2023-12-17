@@ -1,7 +1,7 @@
 import os, os.path
 from collections.abc import Iterable
 
-from datetime import date
+from datetime import date, datetime
 
 from jinja2 import Environment, FileSystemLoader, select_autoescape
 
@@ -68,7 +68,7 @@ def draw_report(member: Member, holidays: list[date], year=THIS_YEAR, output_dir
     weekends = build_weekends(holidays, year)
 
     template = jinja2_env.get_template('report.html')
-    report = template.render(year=year, member=member, symbols=symbols, weekends=weekends)
+    report = template.render(year=year, member=member, symbols=symbols, weekends=weekends, generate_datetime=datetime.now())
 
     os.makedirs(output_dir, exist_ok=True)
     output_file = os.path.join(output_dir, f'{member.name}(잔여 {member.dayoff_left_count}).html')
@@ -85,7 +85,7 @@ def draw_monthly(members: Iterable[Member], holidays: list[date], year=THIS_YEAR
         monthly.append_member(member)
 
     template = jinja2_env.get_template('monthly.html')
-    report = template.render(year=year, month=month, report=monthly, weeks=len(monthly.days))
+    report = template.render(year=year, month=month, report=monthly, weeks=len(monthly.days), generate_datetime=datetime.now())
 
     os.makedirs(output_dir, exist_ok=True)
     output_file = os.path.join(output_dir, f'{year}년 {month}월.html')
