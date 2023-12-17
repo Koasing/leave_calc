@@ -1,14 +1,45 @@
+from __future__ import annotations
+
+import numpy as np
 import pandas as pd
+import gspread
 
 from leave_class import update_holidays
 from leave_class import Member
 from draw_report import draw_report, draw_monthly
 
 
-def main(fn: str, year=2023):
+def get_data_from_gsheet(credential_file: str, sheet_key: str):
+    client = gspread.service_account(filename=credential_file)
+    sheet = client.open_by_key(sheet_key)
+
+    def get_dataframe(ws: gspread.Worksheet, filter_column: str | list[str]):
+        if isinstance(filter_column, str):
+            filter_column = [filter_column]
+        df = pd.DataFrame(ws.get_all_records())
+        # replace all empty strings to nan
+        df.replace('', np.nan, inplace=True)
+        df.dropna(subset=filter_column, inplace=True)
+
+        return df
+
+    leaves = get_dataframe(sheet.get_worksheet(0), "휴가일정시작")
+    compensations = get_dataframe(sheet.get_worksheet(1), "지급일수")
+    holidays = get_dataframe(sheet.get_worksheet(2), "종류")
+
+    return leaves, compensations, holidays
+
+
+def get_data_from_excel(fn: str):
     leaves = pd.read_excel(fn, 0)
     compensations = pd.read_excel(fn, 1)
     holidays = pd.read_excel(fn, 2)
+
+    return leaves, compensations, holidays
+
+
+def main(fn: str, year=2023):
+    leaves, compensations, holidays = get_data_from_excel(fn)
 
     h = update_holidays(holidays)
     print('HOLIDAYS:')
