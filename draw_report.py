@@ -71,7 +71,7 @@ def draw_report(member: Member, holidays: list[date], year=THIS_YEAR, output_dir
     report = template.render(year=year, member=member, symbols=symbols, weekends=weekends, generate_datetime=datetime.now())
 
     os.makedirs(output_dir, exist_ok=True)
-    output_file = os.path.join(output_dir, f'{member.name}(잔여 {member.dayoff_left_count}).html')
+    output_file = os.path.join(output_dir, f'{member.name}.html')
 
     with open(output_file, mode='w', encoding='utf-8') as fd:
         fd.write(report)
