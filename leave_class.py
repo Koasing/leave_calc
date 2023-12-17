@@ -137,10 +137,10 @@ class Member:
             # 취소 처리
             if row['휴가종류'] == '취소':
                 # 주말 처리. date.weekday() -> 0(월) ~ 5(토), 6(일)
-                if row['휴가종류'] not in ['공가', '병가', '기타'] and d.weekday() in [5, 6]:
+                if row['사유'] not in ['공가', '병가', '기타'] and d.weekday() in [5, 6]:
                     continue
 
-                if row['휴가종류'] not in ['공가', '병가', '기타'] and d in holidays:
+                if row['사유'] not in ['공가', '병가', '기타'] and d in holidays:
                     continue
 
                 cancels = [l for l in self.leaves if l.date_ == d and l.type_ == row['사유']]
